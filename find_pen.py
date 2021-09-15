@@ -93,8 +93,6 @@ try:
             cv2.destroyAllWindows()
             break
 
-        # Take each frame
-        #_, color_image = cap.read()
         # Convert BGR to HSV
         hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
         # define range of purple color in HSV
@@ -129,6 +127,11 @@ try:
                 cy = int(M['m01']/M['m00'])
                 cv2.circle(mask_filtered, (cx, cy), 7, (150, 150, 0), -1)
                 print(f"Centroid of Largest Contour: {cx},{cy}")
+
+                #Find centroid depth
+                centroid_depth_image = depth_image[cx][cy]
+                centroid_depth = centroid_depth_image*depth_scale
+                print(f"Centroid depth: {centroid_depth}") 
             else:
                 print("Centroid of Largest Contour: Null")
         else:
@@ -137,10 +140,10 @@ try:
         #Draw contours
         cv2.drawContours(mask_filtered, contours, -1, (0,255,0), 1)
         
-
+        # Show frames
         cv2.imshow('Frame',color_image)
         cv2.imshow('Mask',mask)
         cv2.imshow('Mask Filtered', mask_filtered)
-        #cv2.imshow('Res',res)
+
 finally:
     pipeline.stop()
