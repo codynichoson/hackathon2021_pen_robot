@@ -73,14 +73,6 @@ try:
 
         depth_image = np.asanyarray(aligned_depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-        # print(f"Length of depth_image: {len(depth_image)}")
-        # print(f"Size of depth_image: {depth_image.size}")
-        # print(f"Depth at 100,100: {depth_image[100][100]}")
-        # print(f"Length of color_image: {len(color_image)}")
-        # print(f"Size of color_image: {color_image.size}")
-        # print(color_image[100][100][0])
-        # print(color_image[100][100][1])
-        # print(color_image[100][100][2])
 
         # Remove background - Set pixels further than clipping_distance to grey
         grey_color = 153
@@ -122,14 +114,29 @@ try:
         # Find contours
         contours, hierarchy = cv2.findContours(mask_eroded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-            # M = cv2.moments(contours[0])
-            # cx = int(M['m10']/M['m00'])
-            # cy = int(M['m01']/M['m00'])
-            # print(f"Centroid: {cx},{cy}")
+        contour_areas = []
+
+        # Find centroid of first contour
+        if len(contours) > 0:
+            for x in contours:
+                contour_areas.append(cv2.contourArea(x))
+            print(f"Contour areas: {contour_areas}")
+            big_contour_index = np.argmax(contour_areas)
+
+            M = cv2.moments(contours[big_contour_index])
+            if M['m00'] != 0:
+                cx = int(M['m10']/M['m00'])
+                cy = int(M['m01']/M['m00'])
+                cv2.circle(mask_filtered, (cx, cy), 7, (150, 150, 0), -1)
+                print(f"Centroid of Largest Contour: {cx},{cy}")
+            else:
+                print("Centroid of Largest Contour: Null")
+        else:
+            print("No centroid")
 
         #Draw contours
         cv2.drawContours(mask_filtered, contours, -1, (0,255,0), 1)
-        #cv2.circle(mask_eroded, (cx, cy), 7, (255, 255, 255), -1)
+        
 
         cv2.imshow('Frame',color_image)
         cv2.imshow('Mask',mask)
