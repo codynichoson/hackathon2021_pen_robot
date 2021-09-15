@@ -75,11 +75,12 @@ try:
         color_image = np.asanyarray(color_frame.get_data())
         # print(f"Length of depth_image: {len(depth_image)}")
         # print(f"Size of depth_image: {depth_image.size}")
-        print(f"Length of color_image: {len(color_image)}")
-        print(f"Size of color_image: {color_image.size}")
-        print(color_image[100][100][0])
-        print(color_image[100][100][1])
-        print(color_image[100][100][2])
+        # print(f"Depth at 100,100: {depth_image[100][100]}")
+        # print(f"Length of color_image: {len(color_image)}")
+        # print(f"Size of color_image: {color_image.size}")
+        # print(color_image[100][100][0])
+        # print(color_image[100][100][1])
+        # print(color_image[100][100][2])
 
         # Remove background - Set pixels further than clipping_distance to grey
         grey_color = 153
@@ -89,15 +90,50 @@ try:
         # Render images:
         #   depth align to color on left
         #   depth on right
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-        images = np.hstack((bg_removed, depth_colormap))
+        #depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+        #images = np.hstack((bg_removed, depth_colormap))
 
-        cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
-        cv2.imshow('Align Example', images)
+        #cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
+        #cv2.imshow('Align Example', images)
         key = cv2.waitKey(1)
         # Press esc or 'q' to close the image window
         if key & 0xFF == ord('q') or key == 27:
             cv2.destroyAllWindows()
             break
+
+        # Take each frame
+        #_, color_image = cap.read()
+        # Convert BGR to HSV
+        hsv = cv2.cvtColor(color_image, cv2.COLOR_BGR2HSV)
+        # define range of purple color in HSV
+        lower_purple = np.array([110,100,20])
+        upper_purple = np.array([140,255,255])
+        # Threshold the HSV image to get only purple colors
+        mask = cv2.inRange(hsv, lower_purple, upper_purple)
+        # Bitwise-AND mask and original image
+        #res = cv2.bitwise_and(color_image,color_image, mask = mask)
+                        
+        # Filter image using erosion technique
+        # Take matrix of size 5 as the kernel (matrix used to convolve image)
+        kernel = np.ones((5,5), np.uint8)
+        mask_eroded = cv2.erode(mask, kernel, iterations=2)
+        mask_filtered = cv2.dilate(mask_eroded, kernel, iterations=2)
+
+        # Find contours
+        contours, hierarchy = cv2.findContours(mask_eroded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            # M = cv2.moments(contours[0])
+            # cx = int(M['m10']/M['m00'])
+            # cy = int(M['m01']/M['m00'])
+            # print(f"Centroid: {cx},{cy}")
+
+        #Draw contours
+        cv2.drawContours(mask_filtered, contours, -1, (0,255,0), 1)
+        #cv2.circle(mask_eroded, (cx, cy), 7, (255, 255, 255), -1)
+
+        cv2.imshow('Frame',color_image)
+        cv2.imshow('Mask',mask)
+        cv2.imshow('Mask Filtered', mask_filtered)
+        #cv2.imshow('Res',res)
 finally:
     pipeline.stop()
