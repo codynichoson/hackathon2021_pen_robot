@@ -6,9 +6,17 @@ import numpy as np
 # Import OpenCV for easy image rendering
 import cv2
 
+import modern_robotics as mr
+
+X_old = 0
+Y_old = 0
+D_old = 0
+
 # Import robot file and set pose to home
 import move_robot
-move_robot.home_pose()
+move_robot.sleep_pose()
+move_robot.move_wrist()
+move_robot.open_grip()
 
 # Create a pipeline
 pipeline = rs.pipeline()
@@ -146,15 +154,39 @@ try:
             profile = cfg.get_stream(rs.stream.color)
             intr = profile.as_video_stream_profile().get_intrinsics()
             pen_coordinates = rs.rs2_deproject_pixel_to_point(intr, [cx, cy], centroid_depth)
+            
             X = pen_coordinates[0]
             Y = pen_coordinates[1]
             D = pen_coordinates[2] 
+
+            # Filter out extremes
+            if np.absolute(X - X_old) < 0.05: 
+                pass
+            else:
+                X = X_old
+                Y = Y_old
+                D = D_old
 
             print(f"Pen Location     X: {round(X,3)}   Y:{round(Y,3)}   D: {round(D,3)}")
 
 
             # Set robot waist position
             move_robot.move_waist(X, Y, D)
+            
+            # Move robot forward
+            status = move_robot.move_forward(X, Y, D)
+
+            # Grab pen
+            if status:
+                move_robot.grab_pen()
+                break
+            else:
+                pass
+
+            X_old = X
+            Y_old = Y
+            D_old = D
+
 
 
 
