@@ -126,22 +126,24 @@ try:
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
                 cv2.circle(mask_filtered, (cx, cy), 7, (150, 150, 0), -1)
-                print(f"Centroid of Largest Contour: {cx},{cy}")
+                #print(f"Centroid of Largest Contour: {cx},{cy}")
 
                 #Find centroid depth
                 if cx < 640 and cy < 480:
                     centroid_depth_image = depth_image[cy][cx]
                     centroid_depth = centroid_depth_image*depth_scale
-                    print(f"Centroid depth: {centroid_depth}") 
+                    #print(f"Centroid depth: {centroid_depth}") 
                 else:
                     centroid_depth = 0.3
-                    print(f"Centroid depth: {centroid_depth}") 
+                    #print(f"Centroid depth: {centroid_depth}") 
 
             # Note in the example code, cfg is misleadingly called "profile" but cfg is a better name
             profile = cfg.get_stream(rs.stream.color)
             intr = profile.as_video_stream_profile().get_intrinsics()
             pen_coordinates = rs.rs2_deproject_pixel_to_point(intr, [cx, cy], centroid_depth) 
-            print(f"Pen Coordinates: {pen_coordinates}")
+            #print(f"Pen Coordinates: {pen_coordinates}")
+
+            print(f"Pen Location     X: {round(pen_coordinates[0],5)}   Y:{round(pen_coordinates[1],5)}   D: {round(pen_coordinates[2],5)}")
 
         else:
             pass
