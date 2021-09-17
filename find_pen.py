@@ -1,4 +1,5 @@
 # First import the library
+from numpy.typing import _128Bit
 import pyrealsense2 as rs
 # Import Numpy for easy array manipulation
 import numpy as np
@@ -140,12 +141,16 @@ try:
             # Note in the example code, cfg is misleadingly called "profile" but cfg is a better name
             profile = cfg.get_stream(rs.stream.color)
             intr = profile.as_video_stream_profile().get_intrinsics()
-            pen_coordinates = rs.rs2_deproject_pixel_to_point(intr, [cx, cy], centroid_depth) 
-            #print(f"Pen Coordinates: {pen_coordinates}")
+            pen_coordinates = rs.rs2_deproject_pixel_to_point(intr, [cx, cy], centroid_depth)
+            X = pen_coordinates[0]
+            Y = pen_coordinates[1]
+            D = pen_coordinates[2] 
 
-            print(f"Pen Location     X: {round(pen_coordinates[0],5)}   Y:{round(pen_coordinates[1],5)}   D: {round(pen_coordinates[2],5)}")
+            print(f"Pen Location     X: {round(X,3)}   Y:{round(Y,3)}   D: {round(D,3)}")
 
-        else:
+
+
+        else: #If no contours, don't do anything
             pass
             
         #Draw contours
