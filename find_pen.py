@@ -35,10 +35,10 @@ else:
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
 # Start streaming
-profile = pipeline.start(config)
+cfg = pipeline.start(config)
 
 # Getting the depth sensor's depth scale (see rs-align example for explanation)
-depth_sensor = profile.get_device().first_depth_sensor()
+depth_sensor = cfg.get_device().first_depth_sensor()
 depth_scale = depth_sensor.get_depth_scale()
 print("Depth Scale is: " , depth_scale)
 
@@ -118,9 +118,9 @@ try:
         if len(contours) > 0:
             for x in contours:
                 contour_areas.append(cv2.contourArea(x))
-            print(f"Contour areas: {contour_areas}")
             big_contour_index = np.argmax(contour_areas)
 
+            # Find centroid of largest contour
             M = cv2.moments(contours[big_contour_index])
             if M['m00'] != 0:
                 cx = int(M['m10']/M['m00'])
@@ -129,14 +129,23 @@ try:
                 print(f"Centroid of Largest Contour: {cx},{cy}")
 
                 #Find centroid depth
-                centroid_depth_image = depth_image[cx][cy]
-                centroid_depth = centroid_depth_image*depth_scale
-                print(f"Centroid depth: {centroid_depth}") 
-            else:
-                print("Centroid of Largest Contour: Null")
-        else:
-            print("No centroid")
+                if cx < 480 and cy < 640:
+                    centroid_depth_image = depth_image[cx][cy]
+                    centroid_depth = centroid_depth_image*depth_scale
+                    print(f"Centroid depth: {centroid_depth}") 
+                else:
+                    centroid_depth = 0.3
+                    print(f"Centroid depth: {centroid_depth}") 
 
+            # Note in the example code, cfg is misleadingly called "profile" but cfg is a better name
+            profile = cfg.get_stream(rs.stream.color)
+            intr = profile.as_video_stream_profile().get_intrinsics()
+            pen_coordinates = rs.rs2_deproject_pixel_to_point(intr, [cx, cy], centroid_depth) 
+            print(f"Pen Coordinates: {pen_coordinates}")
+
+        else:
+            pass
+            
         #Draw contours
         cv2.drawContours(mask_filtered, contours, -1, (0,255,0), 1)
         
