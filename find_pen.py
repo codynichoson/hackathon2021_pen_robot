@@ -6,6 +6,10 @@ import numpy as np
 # Import OpenCV for easy image rendering
 import cv2
 
+# Import robot file and set pose to home
+import move_robot
+move_robot.home_pose()
+
 # Create a pipeline
 pipeline = rs.pipeline()
 
@@ -147,6 +151,10 @@ try:
             D = pen_coordinates[2] 
 
             print(f"Pen Location     X: {round(X,3)}   Y:{round(Y,3)}   D: {round(D,3)}")
+
+
+            # Set robot waist position
+            move_robot.move_waist(X, Y, D)
 
 
 
