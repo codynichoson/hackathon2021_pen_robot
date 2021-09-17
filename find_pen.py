@@ -129,8 +129,8 @@ try:
                 print(f"Centroid of Largest Contour: {cx},{cy}")
 
                 #Find centroid depth
-                if cx < 480 and cy < 640:
-                    centroid_depth_image = depth_image[cx][cy]
+                if cx < 640 and cy < 480:
+                    centroid_depth_image = depth_image[cy][cx]
                     centroid_depth = centroid_depth_image*depth_scale
                     print(f"Centroid depth: {centroid_depth}") 
                 else:
@@ -151,7 +151,7 @@ try:
         
         # Show frames
         cv2.imshow('Frame',color_image)
-        cv2.imshow('Mask',mask)
+        #cv2.imshow('Mask',mask)
         cv2.imshow('Mask Filtered', mask_filtered)
 
 finally:
