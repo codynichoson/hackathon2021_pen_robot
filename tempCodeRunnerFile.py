@@ -1,0 +1,1 @@
+if cx >= 0 and cx < 480 and cy >= 0 and cy < 640:
